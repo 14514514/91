@@ -1,0 +1,265 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local SlapEvent = ReplicatedStorage:WaitForChild("ITS")
+_G.allLoop = false
+_G.specificLoop = false
+_G.uiExpanded = true
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 220, 0, 240)
+Frame.Position = UDim2.new(1, -230, 0.5, -120)
+Frame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Text = "拍飞控制器"
+Title.Size = UDim2.new(1, -30, 0, 25)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.Parent = Frame
+
+local ToggleExpandButton = Instance.new("TextButton")
+ToggleExpandButton.Text = "-"
+ToggleExpandButton.Size = UDim2.new(0, 25, 0, 25)
+ToggleExpandButton.Position = UDim2.new(1, -25, 0, 0)
+ToggleExpandButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleExpandButton.TextColor3 = Color3.new(1, 1, 1)
+ToggleExpandButton.Font = Enum.Font.SourceSansBold
+ToggleExpandButton.TextSize = 18
+ToggleExpandButton.Parent = Frame
+
+local NameInput = Instance.new("TextBox")
+NameInput.PlaceholderText = "输入玩家名(任意分隔符)"
+NameInput.Size = UDim2.new(0.9, 0, 0, 25)
+NameInput.Position = UDim2.new(0.05, 0, 0.12, 0)
+NameInput.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+NameInput.TextColor3 = Color3.new(1, 1, 1)
+NameInput.Parent = Frame
+
+local ToggleSpecificButton = Instance.new("TextButton")
+ToggleSpecificButton.Text = "开启循环拍飞指定玩家"
+ToggleSpecificButton.Size = UDim2.new(0.9, 0, 0, 25)
+ToggleSpecificButton.Position = UDim2.new(0.05, 0, 0.27, 0)
+ToggleSpecificButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+ToggleSpecificButton.TextColor3 = Color3.new(1, 1, 1)
+ToggleSpecificButton.Parent = Frame
+
+local SlapSingleButton = Instance.new("TextButton")
+SlapSingleButton.Text = "拍飞指定玩家"
+SlapSingleButton.Size = UDim2.new(0.9, 0, 0, 25)
+SlapSingleButton.Position = UDim2.new(0.05, 0, 0.42, 0)
+SlapSingleButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+SlapSingleButton.TextColor3 = Color3.new(1, 1, 1)
+SlapSingleButton.Parent = Frame
+
+local ToggleAllButton = Instance.new("TextButton")
+ToggleAllButton.Text = "开启循环拍飞所有人"
+ToggleAllButton.Size = UDim2.new(0.9, 0, 0, 25)
+ToggleAllButton.Position = UDim2.new(0.05, 0, 0.57, 0)
+ToggleAllButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+ToggleAllButton.TextColor3 = Color3.new(1, 1, 1)
+ToggleAllButton.Parent = Frame
+
+local AuthorLabel = Instance.new("TextLabel")
+AuthorLabel.Text = "作者QQ:195118463\n此脚本仅支持巨魔西格玛塔"
+AuthorLabel.Size = UDim2.new(0.9, 0, 0, 40)
+AuthorLabel.Position = UDim2.new(0.05, 0, 0.85, 0)
+AuthorLabel.BackgroundTransparency = 1
+AuthorLabel.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+AuthorLabel.TextSize = 12
+AuthorLabel.Font = Enum.Font.SourceSans
+AuthorLabel.TextWrapped = true
+AuthorLabel.Parent = Frame
+
+local lastActivationTime = 0
+local activePlayers = {}
+local allLoopActive = false
+
+local function EnsureActivation()
+    if os.clock() - lastActivationTime > 5 then
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            SlapEvent:FireServer("slash", LocalPlayer.Character, Vector3.new(0,0,0))
+            lastActivationTime = os.clock()
+        end
+    end
+end
+
+local function SlapPlayer(player)
+    EnsureActivation()
+    
+    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local charPos = LocalPlayer.Character.HumanoidRootPart.Position
+        local targetPos = player.Character.HumanoidRootPart.Position
+        
+        local direction = (targetPos - charPos).Unit
+        local force = direction * 30 + Vector3.new(0, 10, 0)
+        
+        SlapEvent:FireServer("slash", player.Character, force)
+    end
+end
+
+local function TrackPlayer(player)
+    if not activePlayers[player] then
+        activePlayers[player] = true
+        
+        local connection
+        connection = player.CharacterAdded:Connect(function(character)
+            if activePlayers[player] then
+                task.wait(0.5)
+                if character:FindFirstChild("HumanoidRootPart") then
+                    SlapPlayer(player)
+                end
+            else
+                connection:Disconnect()
+            end
+        end)
+    end
+end
+
+local function StopTrackingPlayer(player)
+    activePlayers[player] = nil
+end
+
+local function SlapAllLoop()
+    while allLoopActive do
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                SlapPlayer(player)
+                TrackPlayer(player)
+            end
+        end
+        task.wait(0.2)
+    end
+end
+
+local function SlapSpecificLoop()
+    while _G.specificLoop do
+        local targets = {}
+        local input = NameInput.Text
+        
+        if #input > 0 then
+            for _, player in ipairs(Players:GetPlayers()) do
+                for word in input:gmatch("[^%s,;|]+") do
+                    if player.Name:lower():find(word:lower(), 1, true) then
+                        table.insert(targets, player)
+                        break
+                    end
+                end
+            end
+        end
+        
+        for _, target in ipairs(targets) do
+            if target ~= LocalPlayer then
+                SlapPlayer(target)
+                TrackPlayer(target)
+            end
+        end
+        task.wait(0.3)
+    end
+    
+    -- 停止追踪指定玩家
+    for _, player in ipairs(Players:GetPlayers()) do
+        if activePlayers[player] then
+            StopTrackingPlayer(player)
+        end
+    end
+end
+
+local function ToggleUI()
+    _G.uiExpanded = not _G.uiExpanded
+    
+    if _G.uiExpanded then
+        Frame.Size = UDim2.new(0, 220, 0, 240)
+        ToggleExpandButton.Text = "-"
+        NameInput.Visible = true
+        ToggleSpecificButton.Visible = true
+        SlapSingleButton.Visible = true
+        ToggleAllButton.Visible = true
+        AuthorLabel.Visible = true
+    else
+        Frame.Size = UDim2.new(0, 100, 0, 25)
+        ToggleExpandButton.Text = "+"
+        NameInput.Visible = false
+        ToggleSpecificButton.Visible = false
+        SlapSingleButton.Visible = false
+        ToggleAllButton.Visible = false
+        AuthorLabel.Visible = false
+    end
+end
+
+local function InitializeSlap()
+    for i = 1, 3 do
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            SlapEvent:FireServer("slash", LocalPlayer.Character, Vector3.new(0,0,0))
+            lastActivationTime = os.clock()
+            break
+        end
+        task.wait(0.5)
+    end
+end
+
+task.spawn(function()
+    LocalPlayer.CharacterAdded:Wait()
+    task.wait(1)
+    InitializeSlap()
+end)
+
+InitializeSlap()
+
+ToggleExpandButton.MouseButton1Click:Connect(ToggleUI)
+
+ToggleAllButton.MouseButton1Click:Connect(function()
+    allLoopActive = not allLoopActive
+    if allLoopActive then
+        ToggleAllButton.Text = "关闭循环拍飞所有人"
+        coroutine.wrap(SlapAllLoop)()
+    else
+        ToggleAllButton.Text = "开启循环拍飞所有人"
+        
+        -- 停止追踪所有玩家
+        for player, _ in pairs(activePlayers) do
+            StopTrackingPlayer(player)
+        end
+    end
+end)
+
+SlapSingleButton.MouseButton1Click:Connect(function()
+    local targets = {}
+    local input = NameInput.Text
+    
+    if #input > 0 then
+        for _, player in ipairs(Players:GetPlayers()) do
+            for word in input:gmatch("[^%s,;|]+") do
+                if player.Name:lower():find(word:lower(), 1, true) then
+                    table.insert(targets, player)
+                    break
+                end
+            end
+        end
+    end
+    
+    for _, target in ipairs(targets) do
+        if target ~= LocalPlayer then
+            SlapPlayer(target)
+        end
+    end
+end)
+
+ToggleSpecificButton.MouseButton1Click:Connect(function()
+    _G.specificLoop = not _G.specificLoop
+    if _G.specificLoop then
+        ToggleSpecificButton.Text = "关闭循环拍飞指定玩家"
+        coroutine.wrap(SlapSpecificLoop)()
+    else
+        ToggleSpecificButton.Text = "开启循环拍飞指定玩家"
+    end
+end)
