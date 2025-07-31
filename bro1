@@ -1,0 +1,273 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SkullGloveUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player.PlayerGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 30)
+mainFrame.Position = UDim2.new(0.5, -110, 0.3, -15)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+mainFrame.BorderSizePixel = 1
+mainFrame.BorderColor3 = Color3.fromRGB(180, 180, 180)
+mainFrame.Parent = screenGui
+
+local title = Instance.new("TextButton")
+title.Text = "💀 控制面板 💀"
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+title.TextColor3 = Color3.new(0.2, 0.2, 0.2)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.AutoButtonColor = false
+title.Parent = mainFrame
+
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, 0, 0, 210)
+contentFrame.Position = UDim2.new(0, 0, 1, 0)
+contentFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+contentFrame.BorderSizePixel = 1
+contentFrame.BorderColor3 = Color3.fromRGB(180, 180, 180)
+contentFrame.Visible = false
+contentFrame.Parent = mainFrame
+
+local loopAllBtn = Instance.new("TextButton")
+loopAllBtn.Name = "LoopAllBtn"
+loopAllBtn.Text = "循环拍飞所有人"
+loopAllBtn.Size = UDim2.new(0.9, 0, 0, 30)
+loopAllBtn.Position = UDim2.new(0.05, 0, 0.05, 0)
+loopAllBtn.BackgroundColor3 = Color3.fromRGB(70, 180, 70)
+loopAllBtn.TextColor3 = Color3.new(1, 1, 1)
+loopAllBtn.Font = Enum.Font.Gotham
+loopAllBtn.TextSize = 12
+loopAllBtn.Parent = contentFrame
+
+local playerInput = Instance.new("TextBox")
+playerInput.PlaceholderText = "玩家名字 (用,分隔)"
+playerInput.Size = UDim2.new(0.9, 0, 0, 25)
+playerInput.Position = UDim2.new(0.05, 0, 0.22, 0)
+playerInput.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+playerInput.TextColor3 = Color3.new(0.2, 0.2, 0.2)
+playerInput.Font = Enum.Font.Gotham
+playerInput.TextSize = 12
+playerInput.Parent = contentFrame
+
+local flySpecificBtn = Instance.new("TextButton")
+flySpecificBtn.Name = "FlySpecificBtn"
+flySpecificBtn.Text = "拍飞指定玩家"
+flySpecificBtn.Size = UDim2.new(0.9, 0, 0, 30)
+flySpecificBtn.Position = UDim2.new(0.05, 0, 0.35, 0)
+flySpecificBtn.BackgroundColor3 = Color3.fromRGB(70, 120, 200)
+flySpecificBtn.TextColor3 = Color3.new(1, 1, 1)
+flySpecificBtn.Font = Enum.Font.Gotham
+flySpecificBtn.TextSize = 12
+flySpecificBtn.Parent = contentFrame
+
+local loopSpecificBtn = Instance.new("TextButton")
+loopSpecificBtn.Name = "LoopSpecificBtn"
+loopSpecificBtn.Text = "循环拍飞指定玩家"
+loopSpecificBtn.Size = UDim2.new(0.9, 0, 0, 30)
+loopSpecificBtn.Position = UDim2.new(0.05, 0, 0.5, 0)
+loopSpecificBtn.BackgroundColor3 = Color3.fromRGB(70, 180, 70)
+loopSpecificBtn.TextColor3 = Color3.new(1, 1, 1)
+loopSpecificBtn.Font = Enum.Font.Gotham
+loopSpecificBtn.TextSize = 12
+loopSpecificBtn.Parent = contentFrame
+
+local closeAllBtn = Instance.new("TextButton")
+closeAllBtn.Name = "CloseAllBtn"
+closeAllBtn.Text = "关闭所有循环"
+closeAllBtn.Size = UDim2.new(0.9, 0, 0, 30)
+closeAllBtn.Position = UDim2.new(0.05, 0, 0.65, 0)
+closeAllBtn.BackgroundColor3 = Color3.fromRGB(220, 70, 70)
+closeAllBtn.TextColor3 = Color3.new(1, 1, 1)
+closeAllBtn.Font = Enum.Font.Gotham
+closeAllBtn.TextSize = 12
+closeAllBtn.Parent = contentFrame
+
+local goldBtn = Instance.new("TextButton")
+goldBtn.Name = "GoldBtn"
+goldBtn.Text = "金币+100"
+goldBtn.Size = UDim2.new(0.9, 0, 0, 30)
+goldBtn.Position = UDim2.new(0.05, 0, 0.8, 0)
+goldBtn.BackgroundColor3 = Color3.fromRGB(200, 170, 50)
+goldBtn.TextColor3 = Color3.new(1, 1, 1)
+goldBtn.Font = Enum.Font.Gotham
+goldBtn.TextSize = 12
+goldBtn.Parent = contentFrame
+
+local authorLabel = Instance.new("TextLabel")
+authorLabel.Text = "QQ: 195118463"
+authorLabel.Size = UDim2.new(1, 0, 0, 15)
+authorLabel.Position = UDim2.new(0, 0, 0.95, 0)
+authorLabel.BackgroundTransparency = 1
+authorLabel.TextColor3 = Color3.fromRGB(120, 120, 120)
+authorLabel.Font = Enum.Font.Gotham
+authorLabel.TextSize = 10
+authorLabel.Parent = contentFrame
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Text = "▼"
+toggleBtn.Size = UDim2.new(0, 25, 0, 25)
+toggleBtn.Position = UDim2.new(1, -30, 0.5, -12.5)
+toggleBtn.BackgroundTransparency = 1
+toggleBtn.TextColor3 = Color3.new(0.2, 0.2, 0.2)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 14
+toggleBtn.Parent = title
+
+local function flyPlayer(targetPlayer)
+    local character = player.Character
+    if not character then return end
+    
+    local backpack = player:FindFirstChild("Backpack")
+    if not backpack then return end
+    
+    local skullGlove = backpack:FindFirstChild("Skull_Glove")
+    if not skullGlove then return end
+    
+    local event = skullGlove:FindFirstChild("Event")
+    if not event then return end
+    
+    local targetChar = targetPlayer.Character
+    if not targetChar then return end
+    
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+    
+    if humanoidRootPart and targetRoot then
+        local direction = (targetRoot.Position - humanoidRootPart.Position).Unit * 15
+        local args = {
+            "slash",
+            targetChar,
+            Vector3.new(direction.X, 0.5, direction.Z)
+        }
+        event:FireServer(unpack(args))
+    end
+end
+
+local function parsePlayerNames(input)
+    local names = {}
+    local cleaned = input:gsub("[,;]+", " ")
+    for name in cleaned:gmatch("%S+") do
+        table.insert(names, name)
+    end
+    return names
+end
+
+local function findPlayers(names)
+    local players = {}
+    for _, name in ipairs(names) do
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= player and p.Name:lower():find(name:lower(), 1, true) then
+                table.insert(players, p)
+            end
+        end
+    end
+    return players
+end
+
+local function addGold()
+    local event = ReplicatedStorage:WaitForChild("RestartRemotes"):WaitForChild("GiveClaimMoney")
+    local args = {
+        player
+    }
+    event:FireServer(unpack(args))
+end
+
+local loopAllActive = false
+local loopSpecificActive = false
+local loopSpecificPlayers = {}
+
+title.MouseButton1Click:Connect(function()
+    contentFrame.Visible = not contentFrame.Visible
+    if contentFrame.Visible then
+        toggleBtn.Text = "▼"
+        mainFrame.Size = UDim2.new(0, 220, 0, 240)
+    else
+        toggleBtn.Text = "▲"
+        mainFrame.Size = UDim2.new(0, 220, 0, 30)
+    end
+end)
+
+loopAllBtn.MouseButton1Click:Connect(function()
+    loopAllActive = not loopAllActive
+    if loopAllActive then
+        loopAllBtn.Text = "停止拍飞所有人"
+        loopAllBtn.BackgroundColor3 = Color3.fromRGB(220, 70, 70)
+        
+        spawn(function()
+            while loopAllActive and task.wait(0.8) do
+                for _, targetPlayer in ipairs(Players:GetPlayers()) do
+                    if targetPlayer ~= player then
+                        flyPlayer(targetPlayer)
+                    end
+                end
+            end
+            loopAllBtn.Text = "循环拍飞所有人"
+            loopAllBtn.BackgroundColor3 = Color3.fromRGB(70, 180, 70)
+        end)
+    else
+        loopAllBtn.Text = "循环拍飞所有人"
+        loopAllBtn.BackgroundColor3 = Color3.fromRGB(70, 180, 70)
+    end
+end)
+
+flySpecificBtn.MouseButton1Click:Connect(function()
+    local input = playerInput.Text
+    if input == "" then return end
+    
+    local names = parsePlayerNames(input)
+    local players = findPlayers(names)
+    
+    for _, targetPlayer in ipairs(players) do
+        flyPlayer(targetPlayer)
+    end
+end)
+
+loopSpecificBtn.MouseButton1Click:Connect(function()
+    loopSpecificActive = not loopSpecificActive
+    if loopSpecificActive then
+        local input = playerInput.Text
+        if input == "" then return end
+        
+        loopSpecificBtn.Text = "停止指定玩家"
+        loopSpecificBtn.BackgroundColor3 = Color3.fromRGB(220, 70, 70)
+        
+        local names = parsePlayerNames(input)
+        loopSpecificPlayers = findPlayers(names)
+        
+        spawn(function()
+            while loopSpecificActive and task.wait(0.8) do
+                for _, targetPlayer in ipairs(loopSpecificPlayers) do
+                    flyPlayer(targetPlayer)
+                end
+            end
+            loopSpecificBtn.Text = "循环拍飞指定玩家"
+            loopSpecificBtn.BackgroundColor3 = Color3.fromRGB(70, 180, 70)
+        end)
+    else
+        loopSpecificBtn.Text = "循环拍飞指定玩家"
+        loopSpecificBtn.BackgroundColor3 = Color3.fromRGB(70, 180, 70)
+    end
+end)
+
+closeAllBtn.MouseButton1Click:Connect(function()
+    loopAllActive = false
+    loopSpecificActive = false
+    
+    loopAllBtn.Text = "循环拍飞所有人"
+    loopAllBtn.BackgroundColor3 = Color3.fromRGB(70, 180, 70)
+    
+    loopSpecificBtn.Text = "循环拍飞指定玩家"
+    loopSpecificBtn.BackgroundColor3 = Color3.fromRGB(70, 180, 70)
+end)
+
+goldBtn.MouseButton1Click:Connect(function()
+    addGold()
+end)
