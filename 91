@@ -1,0 +1,334 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SkullGloveUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player.PlayerGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 200, 0, 30)
+mainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = screenGui
+
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local title = Instance.new("TextLabel")
+title.Text = "⚔️ 巨魔之塔控制面板 ⚔️"
+title.Size = UDim2.new(1, -40, 1, 0)
+title.Position = UDim2.new(0, 5, 0, 0)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 12
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+local dragging = false
+local dragStartPos
+local startFramePos
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStartPos = input.Position
+        startFramePos = mainFrame.Position
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+        local delta = input.Position - dragStartPos
+        mainFrame.Position = UDim2.new(
+            startFramePos.X.Scale, 
+            startFramePos.X.Offset + delta.X,
+            startFramePos.Y.Scale,
+            startFramePos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+titleBar.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Text = "▼"
+toggleBtn.Size = UDim2.new(0, 30, 0, 30)
+toggleBtn.Position = UDim2.new(1, -30, 0, 0)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+toggleBtn.TextColor3 = Color3.new(1, 1, 1)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 14
+toggleBtn.Parent = titleBar
+
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, 0, 0, 0)
+contentFrame.Position = UDim2.new(0, 0, 0, 30)
+contentFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+contentFrame.BorderSizePixel = 0
+contentFrame.Visible = true
+contentFrame.Parent = mainFrame
+
+local buttonContainer = Instance.new("Frame")
+buttonContainer.Size = UDim2.new(1, -10, 1, -50)
+buttonContainer.Position = UDim2.new(0, 5, 0, 5)
+buttonContainer.BackgroundTransparency = 1
+buttonContainer.Parent = contentFrame
+
+local function createButton(text, yPos, color)
+    local button = Instance.new("TextButton")
+    button.Text = text
+    button.Size = UDim2.new(1, 0, 0, 30)
+    button.Position = UDim2.new(0, 0, 0, yPos)
+    button.BackgroundColor3 = color
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Font = Enum.Font.Gotham
+    button.TextSize = 12
+    button.AutoButtonColor = false
+    button.Parent = buttonContainer
+    
+    button.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(
+            button,
+            TweenInfo.new(0.2),
+            {BackgroundColor3 = Color3.fromRGB(
+                math.min(color.R * 255 + 20, 255),
+                math.min(color.G * 255 + 20, 255),
+                math.min(color.B * 255 + 20, 255)
+            )}
+        ):Play()
+    end)
+    
+    button.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(
+            button,
+            TweenInfo.new(0.2),
+            {BackgroundColor3 = color}
+        ):Play()
+    end)
+    
+    return button
+end
+
+local buttonSpacing = 35
+local loopAllBtn = createButton("循环拍飞所有", 0, Color3.fromRGB(60, 140, 60))
+
+local playerInput = Instance.new("TextBox")
+playerInput.PlaceholderText = "输入玩家名字"
+playerInput.Size = UDim2.new(1, 0, 0, 25)
+playerInput.Position = UDim2.new(0, 0, 0, buttonSpacing)
+playerInput.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+playerInput.TextColor3 = Color3.new(1, 1, 1)
+playerInput.Font = Enum.Font.Gotham
+playerInput.TextSize = 12
+playerInput.Parent = buttonContainer
+
+local flySpecificBtn = createButton("指定玩家拍飞", buttonSpacing * 2, Color3.fromRGB(70, 100, 180))
+local loopSpecificBtn = createButton("指定玩家循环拍飞", buttonSpacing * 3, Color3.fromRGB(60, 140, 60))
+local closeAllBtn = createButton("关闭所有循环", buttonSpacing * 4, Color3.fromRGB(180, 60, 60))
+local goldBtn = createButton("金币+100", buttonSpacing * 5, Color3.fromRGB(180, 150, 40))
+
+local authorLabel = Instance.new("TextLabel")
+authorLabel.Text = "作者: QQ 195118463"
+authorLabel.Size = UDim2.new(1, 0, 0, 15)
+authorLabel.Position = UDim2.new(0, 0, 1, -35)
+authorLabel.BackgroundTransparency = 1
+authorLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+authorLabel.Font = Enum.Font.Gotham
+authorLabel.TextSize = 10
+authorLabel.Parent = contentFrame
+
+local supportLabel = Instance.new("TextLabel")
+supportLabel.Text = "此脚本仅支持巨魔之塔"
+supportLabel.Size = UDim2.new(1, 0, 0, 15)
+supportLabel.Position = UDim2.new(0, 0, 1, -20)
+supportLabel.BackgroundTransparency = 1
+supportLabel.TextColor3 = Color3.fromRGB(220, 100, 100)
+supportLabel.Font = Enum.Font.Gotham
+supportLabel.TextSize = 10
+supportLabel.Parent = contentFrame
+
+local function flyPlayer(targetPlayer)
+    local character = player.Character
+    if not character then return end
+    
+    local backpack = player:FindFirstChild("Backpack")
+    if not backpack then return end
+    
+    local skullGlove = backpack:FindFirstChild("Skull_Glove")
+    if not skullGlove then return end
+    
+    local event = skullGlove:FindFirstChild("Event")
+    if not event then return end
+    
+    local targetChar = targetPlayer.Character
+    if not targetChar then return end
+    
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+    
+    if humanoidRootPart and targetRoot then
+        local direction = (targetRoot.Position - humanoidRootPart.Position).Unit * 15
+        local args = {
+            "slash",
+            targetChar,
+            Vector3.new(direction.X, 0.5, direction.Z)
+        }
+        event:FireServer(unpack(args))
+    end
+end
+
+local function parsePlayerNames(input)
+    local names = {}
+    local cleaned = input:gsub("[,;]+", " ")
+    for name in cleaned:gmatch("%S+") do
+        table.insert(names, name)
+    end
+    return names
+end
+
+local function findPlayers(names)
+    local players = {}
+    for _, name in ipairs(names) do
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= player and p.Name:lower():find(name:lower(), 1, true) then
+                table.insert(players, p)
+            end
+        end
+    end
+    return players
+end
+
+local function addGold()
+    local event = ReplicatedStorage:WaitForChild("RestartRemotes"):WaitForChild("GiveClaimMoney")
+    local args = {
+        player
+    }
+    event:FireServer(unpack(args))
+end
+
+local loopAllActive = false
+local loopSpecificActive = false
+local loopSpecificPlayers = {}
+local isExpanded = false
+local expandedHeight = buttonSpacing * 6 + 50
+
+toggleBtn.MouseButton1Click:Connect(function()
+    isExpanded = not isExpanded
+    
+    if isExpanded then
+        toggleBtn.Text = "▲"
+        game:GetService("TweenService"):Create(
+            contentFrame,
+            TweenInfo.new(0.3),
+            {Size = UDim2.new(1, 0, 0, expandedHeight)}
+        ):Play()
+        game:GetService("TweenService"):Create(
+            mainFrame,
+            TweenInfo.new(0.3),
+            {Size = UDim2.new(0, 200, 0, 30 + expandedHeight)}
+        ):Play()
+    else
+        toggleBtn.Text = "▼"
+        game:GetService("TweenService"):Create(
+            contentFrame,
+            TweenInfo.new(0.3),
+            {Size = UDim2.new(1, 0, 0, 0)}
+        ):Play()
+        game:GetService("TweenService"):Create(
+            mainFrame,
+            TweenInfo.new(0.3),
+            {Size = UDim2.new(0, 200, 0, 30)}
+        ):Play()
+    end
+end)
+
+loopAllBtn.MouseButton1Click:Connect(function()
+    loopAllActive = not loopAllActive
+    if loopAllActive then
+        loopAllBtn.Text = "停止拍飞"
+        loopAllBtn.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
+        
+        spawn(function()
+            while loopAllActive and task.wait(0.8) do
+                for _, targetPlayer in ipairs(Players:GetPlayers()) do
+                    if targetPlayer ~= player then
+                        flyPlayer(targetPlayer)
+                    end
+                end
+            end
+            loopAllBtn.Text = "循环拍飞所有"
+            loopAllBtn.BackgroundColor3 = Color3.fromRGB(60, 140, 60)
+        end)
+    else
+        loopAllBtn.Text = "循环拍飞所有"
+        loopAllBtn.BackgroundColor3 = Color3.fromRGB(60, 140, 60)
+    end
+end)
+
+flySpecificBtn.MouseButton1Click:Connect(function()
+    local input = playerInput.Text
+    if input == "" then return end
+    
+    local names = parsePlayerNames(input)
+    local players = findPlayers(names)
+    
+    for _, targetPlayer in ipairs(players) do
+        flyPlayer(targetPlayer)
+    end
+end)
+
+loopSpecificBtn.MouseButton1Click:Connect(function()
+    loopSpecificActive = not loopSpecificActive
+    if loopSpecificActive then
+        local input = playerInput.Text
+        if input == "" then return end
+        
+        loopSpecificBtn.Text = "停止循环"
+        loopSpecificBtn.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
+        
+        local names = parsePlayerNames(input)
+        loopSpecificPlayers = findPlayers(names)
+        
+        spawn(function()
+            while loopSpecificActive and task.wait(0.8) do
+                for _, targetPlayer in ipairs(loopSpecificPlayers) do
+                    flyPlayer(targetPlayer)
+                end
+            end
+            loopSpecificBtn.Text = "指定玩家循环拍飞"
+            loopSpecificBtn.BackgroundColor3 = Color3.fromRGB(60, 140, 60)
+        end)
+    else
+        loopSpecificBtn.Text = "指定玩家循环拍飞"
+        loopSpecificBtn.BackgroundColor3 = Color3.fromRGB(60, 140, 60)
+    end
+end)
+
+closeAllBtn.MouseButton1Click:Connect(function()
+    loopAllActive = false
+    loopSpecificActive = false
+    
+    loopAllBtn.Text = "循环拍飞所有"
+    loopAllBtn.BackgroundColor3 = Color3.fromRGB(60, 140, 60)
+    
+    loopSpecificBtn.Text = "指定玩家循环拍飞"
+    loopSpecificBtn.BackgroundColor3 = Color3.fromRGB(60, 140, 60)
+end)
+
+goldBtn.MouseButton1Click:Connect(function()
+    addGold()
+end)
