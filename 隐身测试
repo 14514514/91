@@ -1,0 +1,100 @@
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
+local function makeInvisible()
+    for _, part in ipairs(Character:GetDescendants()) do
+        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+            part.Transparency = 1
+            part.CastShadow = false
+            if part:FindFirstChild("Collision") then
+                part.Collision:Destroy()
+            end
+        end
+        if part:IsA("ParticleEmitter") or part:IsA("Trail") then
+            part.Enabled = false
+        end
+        if part:IsA("BillboardGui") and part.Name == "NameTag" then
+            part.Enabled = false
+        end
+    end
+    for _, tool in ipairs(Character:GetChildren()) do
+        if tool:IsA("Tool") then
+            local handle = tool:FindFirstChild("Handle")
+            if handle then
+                handle.Transparency = 0
+            end
+        end
+    end
+end
+
+makeInvisible()
+
+Character.ChildAdded:Connect(function(child)
+    if child:IsA("Tool") then
+        local handle = child:FindFirstChild("Handle")
+        if handle then
+            handle.Transparency = 0
+        end
+    end
+end)
+
+local UserInputService = game:GetService("UserInputService")
+local isInvisible = true
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.H then
+        isInvisible = not isInvisible
+        if isInvisible then
+            makeInvisible()
+        else
+            for _, part in ipairs(Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = 0
+                end
+            end
+        end
+    end
+end)
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local InvisibilityEvent = Instance.new("RemoteEvent")
+InvisibilityEvent.Name = "InvisibilityEvent"
+InvisibilityEvent.Parent = ReplicatedStorage
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(char)
+        InvisibilityEvent.OnServerEvent:Connect(function(plr, state)
+            if plr == player then
+                for _, part in ipairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                        part.Transparency = state and 1 or 0
+                    end
+                end
+            end
+        end)
+    end)
+end)
+
+local function updateWeaponPosition()
+    for _, tool in ipairs(Character:GetChildren()) do
+        if tool:IsA("Tool") then
+            local handle = tool:FindFirstChild("Handle")
+            if handle and Character:FindFirstChild("RightHand") then
+                handle.CFrame = Character.RightHand.CFrame
+            end
+        end
+    end
+end
+
+game:GetService("RunService").RenderStepped:Connect(updateWeaponPosition)
+
+for _, accessory in ipairs(Character:GetChildren()) do
+    if accessory:IsA("Accessory") then
+        local handle = accessory:FindFirstChild("Handle")
+        if handle then
+            handle.Transparency = 1
+        end
+    end
+end
