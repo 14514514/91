@@ -1,0 +1,165 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local SlapTool = LocalPlayer.Character:WaitForChild("BlackSlap")
+local Event = SlapTool:WaitForChild("Event")
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.CoreGui
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.7, 0, 1, 0)
+title.BackgroundTransparency = 1
+title.Text = "拍飞控制器"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+title.Parent = titleBar
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(1, -30, 0, 0)
+toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+toggleButton.Text = "_"
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.Parent = titleBar
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -20, 1, -50)
+contentFrame.Position = UDim2.new(0, 10, 0, 40)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainFrame
+local function slapPlayer(player)
+    if player and player.Character then
+        local args = {
+            "slash",
+            player.Character,
+            Vector3.new(8.415, 0, -5.402)
+        }
+        Event:FireServer(unpack(args))
+    end
+end
+
+local toggleAll = false
+local toggleSpecific = false
+local specificPlayers = {}
+local allSwitch = Instance.new("TextButton")
+allSwitch.Size = UDim2.new(1, 0, 0, 40)
+allSwitch.Position = UDim2.new(0, 0, 0, 0)
+allSwitch.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+allSwitch.Text = "循环拍飞所有人: 关闭"
+allSwitch.TextColor3 = Color3.new(1, 1, 1)
+allSwitch.Font = Enum.Font.SourceSansBold
+allSwitch.TextSize = 16
+allSwitch.Parent = contentFrame
+local inputFrame = Instance.new("Frame")
+inputFrame.Size = UDim2.new(1, 0, 0, 40)
+inputFrame.Position = UDim2.new(0, 0, 0, 60)
+inputFrame.BackgroundTransparency = 1
+inputFrame.Parent = contentFrame
+local playerInput = Instance.new("TextBox")
+playerInput.Size = UDim2.new(0.7, 0, 1, 0)
+playerInput.PlaceholderText = "输入玩家名(用逗号/空格分隔)"
+playerInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+playerInput.TextColor3 = Color3.new(1, 1, 1)
+playerInput.Font = Enum.Font.SourceSans
+playerInput.TextSize = 14
+playerInput.Parent = inputFrame
+local slapButton = Instance.new("TextButton")
+slapButton.Size = UDim2.new(0.25, 0, 1, 0)
+slapButton.Position = UDim2.new(0.75, 5, 0, 0)
+slapButton.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+slapButton.Text = "拍飞指定"
+slapButton.TextColor3 = Color3.new(1, 1, 1)
+slapButton.Font = Enum.Font.SourceSansBold
+slapButton.TextSize = 14
+slapButton.Parent = inputFrame
+local specificFrame = Instance.new("Frame")
+specificFrame.Size = UDim2.new(1, 0, 0, 40)
+specificFrame.Position = UDim2.new(0, 0, 0, 110)
+specificFrame.BackgroundTransparency = 1
+specificFrame.Parent = contentFrame
+local specificSwitch = Instance.new("TextButton")
+specificSwitch.Size = UDim2.new(1, 0, 0, 40)
+specificSwitch.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+specificSwitch.Text = "循环拍飞指定: 关闭"
+specificSwitch.TextColor3 = Color3.new(1, 1, 1)
+specificSwitch.Font = Enum.Font.SourceSansBold
+specificSwitch.TextSize = 16
+specificSwitch.Parent = specificFrame
+local authorLabel = Instance.new("TextLabel")
+authorLabel.Size = UDim2.new(1, 0, 0, 20)
+authorLabel.Position = UDim2.new(0, 0, 1, -20)
+authorLabel.BackgroundTransparency = 1
+authorLabel.Text = "作者QQ:195118463"
+authorLabel.TextColor3 = Color3.new(0.7, 0.7, 0.7)
+authorLabel.Font = Enum.Font.SourceSans
+authorLabel.TextSize = 12
+authorLabel.Parent = contentFrame
+local isExpanded = true
+
+toggleButton.MouseButton1Click:Connect(function()
+    isExpanded = not isExpanded
+    if isExpanded then
+        contentFrame.Visible = true
+        mainFrame.Size = UDim2.new(0, 300, 0, 300)
+        toggleButton.Text = "_"
+    else
+        contentFrame.Visible = false
+        mainFrame.Size = UDim2.new(0, 300, 0, 30)
+        toggleButton.Text = "+"
+    end
+end)
+allSwitch.MouseButton1Click:Connect(function()
+    toggleAll = not toggleAll
+    allSwitch.Text = "循环拍飞所有人: " .. (toggleAll and "开启" or "关闭")
+end)
+slapButton.MouseButton1Click:Connect(function()
+    local names = string.gsub(playerInput.Text, "[%s,;]+", " ")
+    for name in string.gmatch(names, "[^%s]+") do
+        for _, player in ipairs(Players:GetPlayers()) do
+            if string.lower(player.Name) == string.lower(name) and player ~= LocalPlayer then
+                slapPlayer(player)
+            end
+        end
+    end
+end)
+specificSwitch.MouseButton1Click:Connect(function()
+    toggleSpecific = not toggleSpecific
+    specificSwitch.Text = "循环拍飞指定: " .. (toggleSpecific and "开启" or "关闭")
+    specificPlayers = {}
+    local names = string.gsub(playerInput.Text, "[%s,;]+", " ")
+    for name in string.gmatch(names, "[^%s]+") do
+        for _, player in ipairs(Players:GetPlayers()) do
+            if string.lower(player.Name) == string.lower(name) and player ~= LocalPlayer then
+                table.insert(specificPlayers, player)
+            end
+        end
+    end
+end)
+RunService.Heartbeat:Connect(function()
+    if toggleAll then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                slapPlayer(player)
+            end
+        end
+    end
+    if toggleSpecific then
+        for _, player in ipairs(specificPlayers) do
+            if player and player.Parent then
+                slapPlayer(player)
+            end
+        end
+    end
+end)
